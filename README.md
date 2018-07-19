@@ -22,6 +22,7 @@
 ## 计划支持logger
 1. logger到文件
 2. logger到数据库
+3. logger调试窗口
 
 ## 计划支持显示格式：
 1. 图像 raw  jpeg bmp
