@@ -2,6 +2,8 @@
 *.d
 .idea
 
+device_list.txt
+
 # Compiled Object files
 *.slo
 *.lo

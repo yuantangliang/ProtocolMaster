@@ -1,6 +1,7 @@
 # encoding:utf-8
 from tools.converter import str2hexstr, hexstr2str
 from PyQt4.QtCore import pyqtSignal, QObject
+import os
 
 
 class Device(QObject):
@@ -40,7 +41,15 @@ def get_all_device():
     global devices
     if devices is None:
         devices = list()
-        for address in ["00001802050362"]:
+        address_list =  list()
+        if os.path.exists("device_list.txt"):
+            with open("device_list.txt") as handle:
+                for address in handle.readlines():
+                    if address.strip() != "":
+                        address_list.append(address)
+        else:
+            address_list = ["00001802050362"]
+        for address in address_list:
             devices.append(Device(hexstr2str(address)))
     return devices
 

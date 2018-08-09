@@ -32,6 +32,7 @@ def find_head(buff, start, head):
         return pos
     return pos + start
 
+
 class Protocol(object):
 
     @staticmethod

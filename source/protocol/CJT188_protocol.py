@@ -9,7 +9,7 @@ CJT188_TAIL = chr(0x16)
 CJT188_TYPE_WATER = chr(0x10)
 
 
-class DID_901f(object):
+class DIDReadMeter(object):
 
     def __init__(self):
         self.serial = 0
@@ -32,6 +32,11 @@ class CJT188Protocol(Protocol):
     >>> str2hexstr(encoder.get_data())
     '68 10 AA AA AA AA AA AA AA 01 03 90 1F 90 61 16'
     """
+    @staticmethod
+    def create_frame(*args, **kwargs):
+        protocol = CJT188Protocol(args[0])
+        protocol.did_unit = args[1]
+        return protocol
 
     def __init__(self, address=None):
         if address is None:
@@ -40,7 +45,7 @@ class CJT188Protocol(Protocol):
         self.meter_type = 0x10
         self.cmd = 0x01
         self.length = 0x04
-        self.did_unit = DID_901f()
+        self.did_unit = DIDReadMeter()
         self.serial = 0x90
 
     def padding_address(self):

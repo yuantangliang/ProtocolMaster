@@ -1,31 +1,55 @@
 # encoding:utf-8
 from protocol import Protocol, protocol_register
 from protocol import checksum, find_head
-from codec import BinaryEncoder
+from codec import BinaryEncoder, BinaryDecoder
 from tools.converter import hexstr2str, str2hexstr
 
 DL645_HEAD = chr(0x68)
 DL645_TAIL = chr(0x16)
 
-class DID_504d(object):
-    """
-    68+转换器地址+68+01+L+50 4D(倒序+33为8083)+188完整报文（+33）+CS+16
-    """
-    def __init__(self):
-        self.serial = 0
 
+class DIDReadAddress(object):
     def encode(self, encoder):
-        encoder.encode_byte(0x4d)
-        encoder.encode_byte(0x50)
+        encoder.encode_byte(0x13)
+        encoder.encode_byte(0x00)
 
     def decode(self, decoder):
         pass
 
 
+class DIDRealTimeMeterData(object):
+    """
+    透传命令
+    68+转换器地址+68+01+L+50 4D(倒序+33为8083)+188完整报文（+33）+CS+16
+    """
+
+    def __init__(self, data=None):
+        self.address = data
+        self.current_meter_used = 0
+
+    def encode(self, encoder):
+        encoder.encode_byte(00)
+        encoder.encode_byte(0xff)
+        encoder.encode_byte(0x01)
+        encoder.encode_byte(0x00)
+        encoder.encode_byte(0x00)
+        encoder.encode_str(self.address[::-1])
+
+    def decode(self, decoder):
+        decoder.decode_str(54) # did
+        self.address = decoder.decode_str(7)[::-1]
+
+
 def data_encrypt(data):
     out = ""
     for byte in data:
-        out += chr(ord(byte)+0x33)
+        out += chr((ord(byte)+0x33)&0xff)
+    return out
+
+def data_unencrypt(data):
+    out = ""
+    for byte in data:
+        out += chr((ord(byte)+256-0x33)&0xff)
     return out
 
 @protocol_register
@@ -38,28 +62,50 @@ class DL645Protocol(Protocol):
     '68 11 11 11 11 11 11 68 01 02 80 83 3C 16'
     """
 
-    def __init__(self):
+    @staticmethod
+    def create_frame(*args, **kwargs):
+        protocol = DL645Protocol()
+        protocol.address = args[0]
+        protocol.did_unit = args[1]
+        if kwargs.has_key("cmd"):
+            protocol.cmd = kwargs["cmd"]
+        return protocol
+
+    def __init__(self, did_unit=None):
         self.address = chr(0x11)*6
         self.meter_type = 0x10
-        self.cmd = 0x01
+        self.cmd = 0x11
         self.length = 0x04
-        self.did_unit = DID_504d()
+        self.did_unit = did_unit
         self.serial = 0x90
 
     def encode(self, encoder):
         encoder.encode_str(DL645_HEAD)
-        encoder.encode_str(self.address)
+        encoder.encode_str(self.address[::-1])
         encoder.encode_str(DL645_HEAD)
         encoder.encode_byte(self.cmd)
-        did_data = encoder.object2data(self.did_unit)
-        encoder.encode_byte(len(did_data))
-        did_data = data_encrypt(did_data)
-        encoder.encode_str(did_data)
+        if self.cmd == 0x11:
+            did_data = encoder.object2data(self.did_unit)
+            encoder.encode_byte(len(did_data))
+            did_data = data_encrypt(did_data)
+            encoder.encode_str(did_data)
+        elif self.cmd == 0x13:
+            encoder.encode_byte(0x00)
         encoder.encode_byte(checksum(encoder.get_data()))
         encoder.encode_str(DL645_TAIL)
 
     def decode(self, decoder):
-        pass
+        decoder.decode_str(1)
+        self.address = decoder.decode_str(6)[::-1]
+        decoder.decode_str(1)
+        self.cmd = decoder.decode_str(1)
+        self.length = decoder.decode_byte()
+        if self.length > 30:
+            did_data = decoder.decode_str(self.length)
+            did_data = data_unencrypt(did_data)
+            did_decoder = BinaryDecoder()
+            did_decoder.set_data(did_data)
+            self.did_unit = did_decoder.decoder_for_object(DIDRealTimeMeterData)
 
     @staticmethod
     def find_frame_in_buff(data):

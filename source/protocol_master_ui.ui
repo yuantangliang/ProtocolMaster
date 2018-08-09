@@ -84,6 +84,23 @@
          <item row="1" column="0">
           <layout class="QHBoxLayout" name="horizontalLayout_3">
            <item>
+            <widget class="QLineEdit" name="convertAddressLineEdit"/>
+           </item>
+           <item>
+            <widget class="QPushButton" name="readConvertPushButton">
+             <property name="text">
+              <string>抄读转换器地址</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="is645checkBox">
+             <property name="text">
+              <string>645</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <spacer name="horizontalSpacer">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -115,7 +132,7 @@
          <item row="0" column="0">
           <layout class="QVBoxLayout" name="verticalLayout">
            <item>
-            <widget class="QTableWidget" name="statusTableWidget">
+            <widget class="QTableWidget" name="tableWidget">
              <column>
               <property name="text">
                <string>表地址</string>
@@ -323,9 +340,43 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>readConvertPushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>read_convert_address()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>502</x>
+     <y>380</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>648</x>
+     <y>-12</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>is645checkBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>is645Taggle(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>542</x>
+     <y>377</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>540</x>
+     <y>-24</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>start()</slot>
   <slot>stop()</slot>
+  <slot>read_convert_address()</slot>
+  <slot>is645Taggle(bool)</slot>
  </slots>
 </ui>

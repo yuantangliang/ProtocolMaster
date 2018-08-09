@@ -74,8 +74,9 @@ class BinaryDecoder(Decoder):
     def __init__(self, data=None):
         self.data = data
 
-    def decoder_for_object(self, cls, data):
-        protocol = cls(self)
+    def decoder_for_object(self, cls):
+        protocol = cls()
+        protocol.decode(self)
         return protocol
 
     def decode_str(self, length):

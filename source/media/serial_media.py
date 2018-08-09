@@ -6,6 +6,7 @@ import serial
 from PyQt4.QtCore import QTimer, pyqtSignal
 from tools.converter import str2bytearray
 
+
 @media_register
 class SerialMedia(Media):
     data_ready = pyqtSignal(bytearray)
@@ -35,7 +36,7 @@ class SerialMedia(Media):
 
     def open(self):
          if self.serial is None:
-            self.serial = serial.Serial(port="COM36", baudrate=2400, parity=serial.PARITY_EVEN, timeout = 0)
+            self.serial = serial.Serial(port="COM9", baudrate=2400, parity=serial.PARITY_EVEN, timeout = 0)
          return True
 
     def close(self):

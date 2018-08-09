@@ -3,8 +3,12 @@ import sys
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from protocol_master_ui import Ui_MainWindow
-from device.device import get_all_device
+from device.device import get_all_device, find_device_by_address
 from session import SessionSuit
+from protocol.CJT188_protocol import DIDReadMeter,CJT188Protocol
+from protocol.DL645_protocol import DIDReadAddress,DIDRealTimeMeterData
+from tools.converter import str2hexstr, hexstr2str
+from protocol.codec import BinaryDecoder,BinaryEncoder
 
 
 class EsMainWindow(QMainWindow, Ui_MainWindow):
@@ -30,7 +34,9 @@ class EsMainWindow(QMainWindow, Ui_MainWindow):
         self.devices = devices
         self.timer = QTimer()
         self.timer.timeout.connect(self.read_next_device)
+        self.is645 = False
         self.session = SessionSuit.create_188_suit()
+        self.session.data_ready.connect(self.protocol_handle)
 
     def sync_to_ui(self):
         for i, device in enumerate(self.devices):
@@ -43,7 +49,10 @@ class EsMainWindow(QMainWindow, Ui_MainWindow):
         self.send_idx += 1
         self.send_idx %= len(self.devices)
         self.sync_to_ui()
-        self.session.send_data(device.address)
+        if self.is645:
+            self.session.send_data(hexstr2str(str(self.convertAddressLineEdit.text())), DIDRealTimeMeterData(device.address))
+        else:
+            self.session.send_data(device.address, DIDReadMeter())
 
     def eventFilter(self, source, event):
         if source == self.video_label and event.type() == QEvent.MouseButtonPress:
@@ -52,10 +61,39 @@ class EsMainWindow(QMainWindow, Ui_MainWindow):
             return QMainWindow.eventFilter(self, source, event)
 
     def start(self):
-        self.timer.start(2500)
+        self.timer.start(7000)
 
     def stop(self):
         self.timer.stop()
+
+    def read_convert_address(self):
+        self.session.send_data(chr(0xaa)*6, None, cmd=0x13)
+
+    def is645Taggle(self, is645):
+        self.is645 = is645
+        self.session.close()
+        if self.is645:
+            self.session = SessionSuit.create_645_suit()
+        else:
+            self.session = SessionSuit.create_188_suit()
+        self.session.data_ready.connect(self.protocol_handle)
+
+    def protocol_handle(self, protocol):
+        if self.is645:
+            if protocol.cmd == chr(0x93):
+                self.convertAddressLineEdit.setText(str2hexstr(protocol.address))
+            if protocol.cmd == chr(0x91):
+                device = find_device_by_address(protocol.did_unit.address)
+                if device is not None:
+                    device.add_receive_count()
+                else:
+                    print "receive from unknown device,device is not found", str2hexstr(protocol.did_unit.address)
+        else:
+            device = find_device_by_address(protocol.address)
+            if device is not None:
+                device.add_receive_count()
+            else:
+                print "receive from unknown device,device is not found"
 
 
 def protocol_master_run():
