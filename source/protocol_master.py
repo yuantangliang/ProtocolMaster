@@ -6,9 +6,10 @@ from protocol_master_ui import Ui_MainWindow
 from device.device import get_all_device, find_device_by_address
 from session import SessionSuit
 from protocol.CJT188_protocol import DIDReadMeter,CJT188Protocol
-from protocol.DL645_protocol import DIDReadAddress,DIDRealTimeMeterData
+from protocol.DL645_protocol import DIDReadAddress,DIDRealTimeMeterData, DL645Protocol
 from tools.converter import str2hexstr, hexstr2str
 from protocol.codec import BinaryDecoder,BinaryEncoder
+from ui.media_option_ui import get_user_options
 
 
 class EsMainWindow(QMainWindow, Ui_MainWindow):
@@ -38,6 +39,18 @@ class EsMainWindow(QMainWindow, Ui_MainWindow):
         self.session = SessionSuit.create_188_suit()
         self.session.data_ready.connect(self.protocol_handle)
 
+        action = QAction(u"配置", self)
+        action.setShortcut("Ctrl+R")
+        action.triggered.connect(self.show_media_config)
+        self.menuSet.addAction(action)
+        self.toolbar.addAction(action)
+
+    def show_media_config(self):
+        def ok_button_press(options):
+            self.session.media.set_media_options(options)
+        options = self.session.media.get_media_options()
+        get_user_options(options, ok_button_press)
+
     def sync_to_ui(self):
         for i, device in enumerate(self.devices):
             widget = QTableWidgetItem(device.get_summary())
@@ -61,7 +74,8 @@ class EsMainWindow(QMainWindow, Ui_MainWindow):
             return QMainWindow.eventFilter(self, source, event)
 
     def start(self):
-        self.timer.start(7000)
+        self.read_next_device()
+        self.timer.start(int(str(self.readMeterSpanLineEdit.text()))*1000)
 
     def stop(self):
         self.timer.stop()
@@ -71,12 +85,10 @@ class EsMainWindow(QMainWindow, Ui_MainWindow):
 
     def is645Taggle(self, is645):
         self.is645 = is645
-        self.session.close()
         if self.is645:
-            self.session = SessionSuit.create_645_suit()
+            self.session.protocol_cls = DL645Protocol
         else:
-            self.session = SessionSuit.create_188_suit()
-        self.session.data_ready.connect(self.protocol_handle)
+            self.session.protocol_cls = CJT188Protocol
 
     def protocol_handle(self, protocol):
         if self.is645:

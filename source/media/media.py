@@ -3,10 +3,24 @@ import os
 from PyQt4.QtCore import QObject
 
 
+class MediaOptions(object):
+    def __init__(self, key, options, label_text=None, show_options=None,select_id=0):
+        self.key = key
+        self.options = options
+        self.select_id = select_id
+        if label_text is None:
+            label_text = key
+        if show_options is None:
+            show_options = options
+        self.label_text = label_text
+        self.show_options = show_options
+
+    def get_options(self):
+        return [str(i) for i in self.show_options]
+
+
 class Media(QObject):
     def __init__(self, media_options):
-        self.options = {}
-        self.user_options = {}
         self.media_options = media_options
         super(Media, self).__init__()
 
@@ -22,14 +36,17 @@ class Media(QObject):
     def _receive(self):
         pass
 
-    def get_user_options(self):
-        return self.options
-
-    def set_user_options(self, options):
+    def set_media_options(self, options):
         self.user_options = options
 
     def get_media_options(self):
         return self.media_options
+
+    def get_selected_options(self):
+        selected_options = {}
+        for option in self.media_options:
+            selected_options[option.key] = option.options[option.select_id]
+        return selected_options
 
 
 _all_medias = dict()

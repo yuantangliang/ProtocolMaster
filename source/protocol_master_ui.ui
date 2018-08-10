@@ -101,6 +101,20 @@
             </widget>
            </item>
            <item>
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>抄读时间间隔</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="readMeterSpanLineEdit">
+             <property name="text">
+              <string>7</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <spacer name="horizontalSpacer">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -269,6 +283,7 @@
     <property name="title">
      <string>设置</string>
     </property>
+    <addaction name="action"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -302,6 +317,11 @@
   <action name="exportDatabaseAction">
    <property name="text">
     <string>export</string>
+   </property>
+  </action>
+  <action name="action">
+   <property name="text">
+    <string>串口</string>
    </property>
   </action>
  </widget>
@@ -347,8 +367,8 @@
    <slot>read_convert_address()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>502</x>
-     <y>380</y>
+     <x>446</x>
+     <y>391</y>
     </hint>
     <hint type="destinationlabel">
      <x>648</x>
@@ -363,8 +383,8 @@
    <slot>is645Taggle(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>542</x>
-     <y>377</y>
+     <x>493</x>
+     <y>387</y>
     </hint>
     <hint type="destinationlabel">
      <x>540</x>

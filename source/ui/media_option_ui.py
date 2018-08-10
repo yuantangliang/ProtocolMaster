@@ -1,230 +1,83 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'media_option_example.ui'
-#
-# Created by: PyQt4 UI code generator 4.11.4
-#
-# WARNING! All changes made in this file will be lost!
-
+from media_option_example import Ui_ChannelDialog
+from PyQt4.QtCore import *
+from PyQt4.QtGui import *
 from PyQt4 import QtCore, QtGui
 
-try:
-    _fromUtf8 = QtCore.QString.fromUtf8
-except AttributeError:
-    def _fromUtf8(s):
-        return s
 
-try:
-    _encoding = QtGui.QApplication.UnicodeUTF8
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig, _encoding)
-except AttributeError:
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig)
+class EsUserOptionsDialog(QDialog):
+    def __init__(self):
+        super(EsUserOptionsDialog, self).__init__()
+        self.options = []
+        self.setModal(True)
+        self.ok_func = None
+        self.vlayout = None
+        self.group_widget =None
+        self.widget_list =[]
 
-class Ui_ChannelDialog(object):
-    def setupUi(self, ChannelDialog):
-        ChannelDialog.setObjectName(_fromUtf8("ChannelDialog"))
-        ChannelDialog.resize(237, 298)
-        self.gridLayout = QtGui.QGridLayout(ChannelDialog)
-        self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
-        self.buttonBox = QtGui.QDialogButtonBox(ChannelDialog)
+    def setup_ui(self):
+        #self.resize(237, 298)
+        self.vlayout = QVBoxLayout()
+        self.vlayout.setSpacing(20)
+        self.config_groups = QtGui.QGroupBox(self.group_widget)
+        self.config_layout = QtGui.QGridLayout(self.config_groups)
+        self.config_layout.setHorizontalSpacing(20)
+        self.config_layout.setVerticalSpacing(10)
+        for i,option in enumerate(self.options):
+            combobox = QtGui.QComboBox(self.config_groups)
+            combobox.addItems(option.get_options())
+            combobox.setCurrentIndex(option.select_id)
+            self.widget_list.append(combobox)
+            self.config_layout.addWidget(combobox, i, 1, 1, 1)
+            label = QtGui.QLabel(self.config_groups)
+            size_policy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Preferred)
+            size_policy.setHorizontalStretch(0)
+            size_policy.setVerticalStretch(0)
+            size_policy.setHeightForWidth(label.sizePolicy().hasHeightForWidth())
+            label.setSizePolicy(size_policy)
+            label.setText(option.label_text)
+            self.config_layout.addWidget(label, i, 0, 1, 1)
+
+        self.vlayout.addWidget(self.config_groups)
+
+        self.buttonBox = QtGui.QDialogButtonBox(self)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
         self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
-        self.buttonBox.setObjectName(_fromUtf8("buttonBox"))
-        self.gridLayout.addWidget(self.buttonBox, 2, 0, 1, 1)
-        self.tabWidget = QtGui.QTabWidget(ChannelDialog)
-        self.tabWidget.setObjectName(_fromUtf8("tabWidget"))
-        self.serial = QtGui.QWidget()
-        self.serial.setObjectName(_fromUtf8("serial"))
-        self.gridLayout_2 = QtGui.QGridLayout(self.serial)
-        self.gridLayout_2.setObjectName(_fromUtf8("gridLayout_2"))
-        self.btnOpenSerial = QtGui.QPushButton(self.serial)
-        self.btnOpenSerial.setObjectName(_fromUtf8("btnOpenSerial"))
-        self.gridLayout_2.addWidget(self.btnOpenSerial, 1, 1, 1, 1)
-        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.gridLayout_2.addItem(spacerItem, 1, 0, 1, 1)
-        self.groupBox = QtGui.QGroupBox(self.serial)
-        self.groupBox.setTitle(_fromUtf8(""))
-        self.groupBox.setObjectName(_fromUtf8("groupBox"))
-        self.gridLayout_3 = QtGui.QGridLayout(self.groupBox)
-        self.gridLayout_3.setObjectName(_fromUtf8("gridLayout_3"))
-        self.label = QtGui.QLabel(self.groupBox)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
-        self.label.setSizePolicy(sizePolicy)
-        self.label.setObjectName(_fromUtf8("label"))
-        self.gridLayout_3.addWidget(self.label, 0, 0, 1, 1)
-        self.comboBox_port = QtGui.QComboBox(self.groupBox)
-        self.comboBox_port.setObjectName(_fromUtf8("comboBox_port"))
-        self.gridLayout_3.addWidget(self.comboBox_port, 0, 1, 1, 1)
-        self.label_2 = QtGui.QLabel(self.groupBox)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_2.sizePolicy().hasHeightForWidth())
-        self.label_2.setSizePolicy(sizePolicy)
-        self.label_2.setObjectName(_fromUtf8("label_2"))
-        self.gridLayout_3.addWidget(self.label_2, 1, 0, 1, 1)
-        self.comboBox_baud = QtGui.QComboBox(self.groupBox)
-        self.comboBox_baud.setObjectName(_fromUtf8("comboBox_baud"))
-        self.gridLayout_3.addWidget(self.comboBox_baud, 1, 1, 1, 1)
-        self.label_3 = QtGui.QLabel(self.groupBox)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_3.sizePolicy().hasHeightForWidth())
-        self.label_3.setSizePolicy(sizePolicy)
-        self.label_3.setObjectName(_fromUtf8("label_3"))
-        self.gridLayout_3.addWidget(self.label_3, 2, 0, 1, 1)
-        self.comboBox_databits = QtGui.QComboBox(self.groupBox)
-        self.comboBox_databits.setObjectName(_fromUtf8("comboBox_databits"))
-        self.gridLayout_3.addWidget(self.comboBox_databits, 2, 1, 1, 1)
-        self.label_4 = QtGui.QLabel(self.groupBox)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_4.sizePolicy().hasHeightForWidth())
-        self.label_4.setSizePolicy(sizePolicy)
-        self.label_4.setObjectName(_fromUtf8("label_4"))
-        self.gridLayout_3.addWidget(self.label_4, 3, 0, 1, 1)
-        self.comboBox_parity = QtGui.QComboBox(self.groupBox)
-        self.comboBox_parity.setObjectName(_fromUtf8("comboBox_parity"))
-        self.gridLayout_3.addWidget(self.comboBox_parity, 3, 1, 1, 1)
-        self.label_5 = QtGui.QLabel(self.groupBox)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_5.sizePolicy().hasHeightForWidth())
-        self.label_5.setSizePolicy(sizePolicy)
-        self.label_5.setObjectName(_fromUtf8("label_5"))
-        self.gridLayout_3.addWidget(self.label_5, 4, 0, 1, 1)
-        self.comboBox_stopbits = QtGui.QComboBox(self.groupBox)
-        self.comboBox_stopbits.setObjectName(_fromUtf8("comboBox_stopbits"))
-        self.gridLayout_3.addWidget(self.comboBox_stopbits, 4, 1, 1, 1)
-        self.gridLayout_2.addWidget(self.groupBox, 0, 0, 1, 2)
-        self.tabWidget.addTab(self.serial, _fromUtf8(""))
-        self.tabNet = QtGui.QWidget()
-        self.tabNet.setObjectName(_fromUtf8("tabNet"))
-        self.verticalLayout = QtGui.QVBoxLayout(self.tabNet)
-        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.groupBoxNetWork = QtGui.QGroupBox(self.tabNet)
-        self.groupBoxNetWork.setTitle(_fromUtf8(""))
-        self.groupBoxNetWork.setObjectName(_fromUtf8("groupBoxNetWork"))
-        self.formLayout = QtGui.QFormLayout(self.groupBoxNetWork)
-        self.formLayout.setObjectName(_fromUtf8("formLayout"))
-        self.label_7 = QtGui.QLabel(self.groupBoxNetWork)
-        self.label_7.setObjectName(_fromUtf8("label_7"))
-        self.formLayout.setWidget(0, QtGui.QFormLayout.LabelRole, self.label_7)
-        self.lineEditRemoteIP = QtGui.QLineEdit(self.groupBoxNetWork)
-        self.lineEditRemoteIP.setInputMask(_fromUtf8(""))
-        self.lineEditRemoteIP.setObjectName(_fromUtf8("lineEditRemoteIP"))
-        self.formLayout.setWidget(0, QtGui.QFormLayout.FieldRole, self.lineEditRemoteIP)
-        self.label_8 = QtGui.QLabel(self.groupBoxNetWork)
-        self.label_8.setObjectName(_fromUtf8("label_8"))
-        self.formLayout.setWidget(2, QtGui.QFormLayout.LabelRole, self.label_8)
-        self.spinBoxRemotePort = QtGui.QSpinBox(self.groupBoxNetWork)
-        self.spinBoxRemotePort.setMinimum(1)
-        self.spinBoxRemotePort.setMaximum(65535)
-        self.spinBoxRemotePort.setProperty("value", 7000)
-        self.spinBoxRemotePort.setObjectName(_fromUtf8("spinBoxRemotePort"))
-        self.formLayout.setWidget(2, QtGui.QFormLayout.FieldRole, self.spinBoxRemotePort)
-        self.label_9 = QtGui.QLabel(self.groupBoxNetWork)
-        self.label_9.setObjectName(_fromUtf8("label_9"))
-        self.formLayout.setWidget(3, QtGui.QFormLayout.LabelRole, self.label_9)
-        self.spinBoxLocalPort = QtGui.QSpinBox(self.groupBoxNetWork)
-        self.spinBoxLocalPort.setEnabled(True)
-        self.spinBoxLocalPort.setMaximum(65535)
-        self.spinBoxLocalPort.setObjectName(_fromUtf8("spinBoxLocalPort"))
-        self.formLayout.setWidget(3, QtGui.QFormLayout.FieldRole, self.spinBoxLocalPort)
-        self.label_10 = QtGui.QLabel(self.groupBoxNetWork)
-        self.label_10.setObjectName(_fromUtf8("label_10"))
-        self.formLayout.setWidget(5, QtGui.QFormLayout.LabelRole, self.label_10)
-        self.comboBoxNetType = QtGui.QComboBox(self.groupBoxNetWork)
-        self.comboBoxNetType.setObjectName(_fromUtf8("comboBoxNetType"))
-        self.comboBoxNetType.addItem(_fromUtf8(""))
-        self.comboBoxNetType.addItem(_fromUtf8(""))
-        self.formLayout.setWidget(5, QtGui.QFormLayout.FieldRole, self.comboBoxNetType)
-        self.checkBoxAutoLocalPort = QtGui.QCheckBox(self.groupBoxNetWork)
-        self.checkBoxAutoLocalPort.setChecked(True)
-        self.checkBoxAutoLocalPort.setObjectName(_fromUtf8("checkBoxAutoLocalPort"))
-        self.formLayout.setWidget(4, QtGui.QFormLayout.FieldRole, self.checkBoxAutoLocalPort)
-        self.verticalLayout.addWidget(self.groupBoxNetWork)
-        self.horizontalLayout = QtGui.QHBoxLayout()
-        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
-        spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout.addItem(spacerItem1)
-        self.pushButtonConnect = QtGui.QPushButton(self.tabNet)
-        self.pushButtonConnect.setObjectName(_fromUtf8("pushButtonConnect"))
-        self.horizontalLayout.addWidget(self.pushButtonConnect)
-        self.verticalLayout.addLayout(self.horizontalLayout)
-        self.tabWidget.addTab(self.tabNet, _fromUtf8(""))
-        self.jlink = QtGui.QWidget()
-        self.jlink.setObjectName(_fromUtf8("jlink"))
-        self.btnOpenJLink = QtGui.QPushButton(self.jlink)
-        self.btnOpenJLink.setGeometry(QtCore.QRect(70, 160, 101, 31))
-        self.btnOpenJLink.setObjectName(_fromUtf8("btnOpenJLink"))
-        self.tabWidget.addTab(self.jlink, _fromUtf8(""))
-        self.net = QtGui.QWidget()
-        self.net.setObjectName(_fromUtf8("net"))
-        self.gridLayout_4 = QtGui.QGridLayout(self.net)
-        self.gridLayout_4.setObjectName(_fromUtf8("gridLayout_4"))
-        self.groupBox_2 = QtGui.QGroupBox(self.net)
-        self.groupBox_2.setObjectName(_fromUtf8("groupBox_2"))
-        self.gridLayout_5 = QtGui.QGridLayout(self.groupBox_2)
-        self.gridLayout_5.setObjectName(_fromUtf8("gridLayout_5"))
-        self.label_6 = QtGui.QLabel(self.groupBox_2)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_6.sizePolicy().hasHeightForWidth())
-        self.label_6.setSizePolicy(sizePolicy)
-        self.label_6.setObjectName(_fromUtf8("label_6"))
-        self.gridLayout_5.addWidget(self.label_6, 0, 0, 1, 1)
-        self.spinBox_byteTimeout = QtGui.QSpinBox(self.groupBox_2)
-        self.spinBox_byteTimeout.setAccelerated(False)
-        self.spinBox_byteTimeout.setMinimum(50)
-        self.spinBox_byteTimeout.setSingleStep(10)
-        self.spinBox_byteTimeout.setObjectName(_fromUtf8("spinBox_byteTimeout"))
-        self.gridLayout_5.addWidget(self.spinBox_byteTimeout, 0, 1, 1, 1)
-        self.gridLayout_4.addWidget(self.groupBox_2, 0, 0, 1, 1)
-        spacerItem2 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        self.gridLayout_4.addItem(spacerItem2, 1, 0, 1, 1)
-        self.tabWidget.addTab(self.net, _fromUtf8(""))
-        self.gridLayout.addWidget(self.tabWidget, 1, 0, 1, 1)
-        self.label.setBuddy(self.comboBox_port)
+        self.vlayout.addWidget(self.buttonBox)
+        self.setLayout(self.vlayout)
 
-        self.retranslateUi(ChannelDialog)
-        self.tabWidget.setCurrentIndex(0)
-        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), ChannelDialog.accept)
-        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), ChannelDialog.reject)
-        QtCore.QMetaObject.connectSlotsByName(ChannelDialog)
+    def set_options(self, options):
+        self.options = options
+        self.setup_ui()
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
 
-    def retranslateUi(self, ChannelDialog):
-        ChannelDialog.setWindowTitle(_translate("ChannelDialog", "通信参数配置", None))
-        self.btnOpenSerial.setText(_translate("ChannelDialog", "打开", None))
-        self.label.setText(_translate("ChannelDialog", "端口号：", None))
-        self.label_2.setText(_translate("ChannelDialog", "波特率：", None))
-        self.label_3.setText(_translate("ChannelDialog", "数据位：", None))
-        self.label_4.setText(_translate("ChannelDialog", "校验位：", None))
-        self.label_5.setText(_translate("ChannelDialog", "停止位：", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.serial), _translate("ChannelDialog", "串口", None))
-        self.label_7.setText(_translate("ChannelDialog", "目标地址", None))
-        self.lineEditRemoteIP.setText(_translate("ChannelDialog", "127.0.0.1", None))
-        self.label_8.setText(_translate("ChannelDialog", "目标端口", None))
-        self.label_9.setText(_translate("ChannelDialog", "本地端口", None))
-        self.label_10.setText(_translate("ChannelDialog", "通讯类型", None))
-        self.comboBoxNetType.setItemText(0, _translate("ChannelDialog", "TCP", None))
-        self.comboBoxNetType.setItemText(1, _translate("ChannelDialog", "UDP", None))
-        self.checkBoxAutoLocalPort.setText(_translate("ChannelDialog", "自动", None))
-        self.pushButtonConnect.setText(_translate("ChannelDialog", "连接", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tabNet), _translate("ChannelDialog", "网络", None))
-        self.btnOpenJLink.setText(_translate("ChannelDialog", "打开JLink", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.jlink), _translate("ChannelDialog", "JLink", None))
-        self.groupBox_2.setTitle(_translate("ChannelDialog", "帧信息", None))
-        self.label_6.setText(_translate("ChannelDialog", "字节间超时:", None))
-        self.spinBox_byteTimeout.setSuffix(_translate("ChannelDialog", "ms", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.net), _translate("ChannelDialog", "高级设置", None))
+    def set_ok_function(self, func):
+        self.ok_func = func
+
+    def accept(self):
+        if self.ok_func is not None:
+            self.ok_func(self.get_user_options())
+        self.hide()
+
+    def reject(self):
+        self.hide()
+
+    def get_user_options(self):
+        for i, widget in enumerate(self.widget_list):
+            self.options[i].select_id = widget.currentIndex()
+        return self.options
+
+dialog = None
+
+
+def get_user_options(options, ok_select):
+    global dialog
+    dialog = EsUserOptionsDialog()
+    dialog.set_options(options)
+    dialog.set_ok_function(ok_select)
+    dialog.show()
+
+
 
