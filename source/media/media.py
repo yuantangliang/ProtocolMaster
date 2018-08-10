@@ -1,6 +1,7 @@
 # encoding:utf-8
 import os
 from PyQt4.QtCore import QObject
+import pickle
 
 
 class MediaOptions(object):
@@ -19,10 +20,14 @@ class MediaOptions(object):
         return [str(i) for i in self.show_options]
 
 
-class Media(QObject):
+class Media(QObject, object):
     def __init__(self, media_options):
-        self.media_options = media_options
         super(Media, self).__init__()
+        self.media_options = media_options
+        self.pickle_file_name = ".config_" + self.__class__.__name__ + ".pkl"
+        if os.path.exists(self.pickle_file_name):
+            with open(self.pickle_file_name, 'rb') as handle:
+                self.media_options = pickle.load(handle)
 
     def open(self):
         pass
@@ -37,7 +42,9 @@ class Media(QObject):
         pass
 
     def set_media_options(self, options):
-        self.user_options = options
+        self.media_options = options
+        with open(self.pickle_file_name, 'wb') as handle:
+            pickle.dump(options, handle)
 
     def get_media_options(self):
         return self.media_options
