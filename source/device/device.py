@@ -37,20 +37,17 @@ class Device(QObject):
 devices = None
 
 
-def get_all_device():
+def get_all_device(file_name="devices.txt"):
     global devices
-    if devices is None:
-        devices = list()
-        address_list =  list()
-        if os.path.exists("device_list.txt"):
-            with open("device_list.txt") as handle:
-                for address in handle.readlines():
-                    if address.strip() != "":
-                        address_list.append(address)
-        else:
-            address_list = ["00001802050362"]
-        for address in address_list:
-            devices.append(Device(hexstr2str(address)))
+    devices = list()
+    address_list = list()
+    if os.path.exists(file_name):
+        with open(file_name) as handle:
+            for address in handle.readlines():
+                if address.strip() != "":
+                    address_list.append(address)
+    for address in address_list:
+        devices.append(Device(hexstr2str(address)))
     return devices
 
 

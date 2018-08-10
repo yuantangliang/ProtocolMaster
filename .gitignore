@@ -3,6 +3,7 @@
 .idea
 
 device_list.txt
+*.pkl
 
 # Compiled Object files
 *.slo

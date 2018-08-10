@@ -19,31 +19,31 @@ class EsMainWindow(QMainWindow, Ui_MainWindow):
         self.tableWidget.setColumnWidth(0,350)
         self.tableWidget.setColumnWidth(1,350)
         self.tableWidget.setColumnCount(2)
-        self.tableWidget.setRowCount(10)
         self.tableWidget.setSelectionBehavior(QTableWidget.SelectRows)
         self.tableWidget.setSelectionMode(QTableWidget.SingleSelection)
         self.tableWidget.horizontalHeader().setStretchLastSection(True)
         self.tableWidget.horizontalHeader().setResizeMode(QHeaderView.Stretch)
         self.tableWidget.setEditTriggers(self.tableWidget.NoEditTriggers)
-        devices = get_all_device()
-        self.tableWidget.setRowCount(len(devices))
-        for i, device in enumerate(devices):
-            widget = QTableWidgetItem(device.get_hex_string_address())
-            self.tableWidget.setItem(i, 0, widget)
-            device.device_update.connect(self.sync_to_ui)
-        self.send_idx = 0
-        self.devices = devices
         self.timer = QTimer()
         self.timer.timeout.connect(self.read_next_device)
         self.is645 = False
         self.session = SessionSuit.create_188_suit()
         self.session.data_ready.connect(self.protocol_handle)
 
-        action = QAction(u"配置", self)
+        action = QAction(u"通信参数", self)
         action.setShortcut("Ctrl+R")
         action.triggered.connect(self.show_media_config)
         self.menuSet.addAction(action)
         self.toolbar.addAction(action)
+
+        action = QAction(u"导入设备", self)
+        action.triggered.connect(self.import_device_list)
+        self.menuDevice.addAction(action)
+        self.toolbar.addAction(action)
+
+        devices = get_all_device()
+        self.devices = devices
+        self.sync_device_to_ui()
 
     def show_media_config(self):
         def ok_button_press(options):
@@ -51,7 +51,22 @@ class EsMainWindow(QMainWindow, Ui_MainWindow):
         options = self.session.media.get_media_options()
         get_user_options(options, ok_button_press)
 
-    def sync_to_ui(self):
+    def import_device_list(self):
+        file_name = QFileDialog.getOpenFileName()
+        file_name = unicode(file_name.toUtf8(), 'utf-8', 'ignore')
+        self.devices = get_all_device(file_name)
+        self.sync_device_to_ui()
+
+    def sync_device_to_ui(self):
+        devices = self.devices
+        self.tableWidget.setRowCount(len(devices))
+        for i, device in enumerate(devices):
+            widget = QTableWidgetItem(device.get_hex_string_address())
+            self.tableWidget.setItem(i, 0, widget)
+            device.device_update.connect(self.sync_status_to_ui)
+        self.send_idx = 0
+
+    def sync_status_to_ui(self):
         for i, device in enumerate(self.devices):
             widget = QTableWidgetItem(device.get_summary())
             self.tableWidget.setItem(i, 1, widget)
@@ -61,7 +76,7 @@ class EsMainWindow(QMainWindow, Ui_MainWindow):
         device.add_send_count()
         self.send_idx += 1
         self.send_idx %= len(self.devices)
-        self.sync_to_ui()
+        self.sync_status_to_ui()
         if self.is645:
             self.session.send_data(hexstr2str(str(self.convertAddressLineEdit.text())), DIDRealTimeMeterData(device.address))
         else:

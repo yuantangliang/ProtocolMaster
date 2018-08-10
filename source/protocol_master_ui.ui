@@ -283,20 +283,19 @@
     <property name="title">
      <string>设置</string>
     </property>
-    <addaction name="action"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
      <string>帮助</string>
     </property>
    </widget>
-   <widget class="QMenu" name="menuTools">
+   <widget class="QMenu" name="menuDevice">
     <property name="title">
-     <string>工具</string>
+     <string>设备</string>
     </property>
    </widget>
    <addaction name="menuSet"/>
-   <addaction name="menuTools"/>
+   <addaction name="menuDevice"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QToolBar" name="toolbar">
