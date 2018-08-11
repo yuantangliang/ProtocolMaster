@@ -2,8 +2,8 @@
 *.d
 .idea
 
-device_list.txt
 *.pkl
+*.ini
 
 # Compiled Object files
 *.slo

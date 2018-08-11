@@ -12,24 +12,34 @@ class Device(QObject):
         self.send_count = 0
         self.receive_count = 0
         self.address = address
+        self.rate = 1
+        self.keep_send = 0
 
     def get_summary(self):
-        if 0 == self.send_count:
-            rate = 1
-        else:
-            rate = float(self.receive_count)/self.send_count
         info = "send {0},receive {1},rate {2}%".format(self.send_count,
                                                        self.receive_count,
-                                                       rate*100)
+                                                       self.rate * 100)
         return info
 
     def add_send_count(self):
         self.send_count += 1
-        self.device_update.emit()
+        self.keep_send += 1
+        if self.keep_send >= 2:
+            self.update_rate(self.send_count-1)
+            self.device_update.emit()
 
     def add_receive_count(self):
         self.receive_count += 1
+        self.update_rate(self.send_count)
         self.device_update.emit()
+        self.keep_send  = 0
+
+
+    def update_rate(self, send_cnt):
+        if 0 == send_cnt:
+            self.rate = 1
+        else:
+            self.rate  = float(self.receive_count)/send_cnt
 
     def get_hex_string_address(self):
         return str2hexstr(self.address)

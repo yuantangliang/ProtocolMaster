@@ -10,7 +10,10 @@ from protocol.DL645_protocol import DIDReadAddress,DIDRealTimeMeterData, DL645Pr
 from tools.converter import str2hexstr, hexstr2str
 from protocol.codec import BinaryDecoder,BinaryEncoder
 from ui.media_option_ui import get_user_options
-
+from config import ESConfig
+import sys
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 class EsMainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -41,9 +44,11 @@ class EsMainWindow(QMainWindow, Ui_MainWindow):
         self.menuDevice.addAction(action)
         self.toolbar.addAction(action)
 
-        devices = get_all_device()
+        devices = get_all_device(ESConfig.get_instance().get_device_file())
         self.devices = devices
         self.sync_device_to_ui()
+
+        self.send_idx = 0
 
     def show_media_config(self):
         def ok_button_press(options):
@@ -52,8 +57,9 @@ class EsMainWindow(QMainWindow, Ui_MainWindow):
         get_user_options(options, ok_button_press)
 
     def import_device_list(self):
-        file_name = QFileDialog.getOpenFileName()
+        file_name = QFileDialog.getOpenFileName(directory=ESConfig.get_instance().get_device_file())
         file_name = unicode(file_name.toUtf8(), 'utf-8', 'ignore')
+        ESConfig.get_instance().set_device_file(file_name)
         self.devices = get_all_device(file_name)
         self.sync_device_to_ui()
 
@@ -89,6 +95,9 @@ class EsMainWindow(QMainWindow, Ui_MainWindow):
             return QMainWindow.eventFilter(self, source, event)
 
     def start(self):
+        if len(self.devices) == 0:
+            QMessageBox.information(self, u"导入设备", u"轮抄需要首先导入设备列表")
+            return
         self.read_next_device()
         self.timer.start(int(str(self.readMeterSpanLineEdit.text()))*1000)
 
@@ -96,7 +105,8 @@ class EsMainWindow(QMainWindow, Ui_MainWindow):
         self.timer.stop()
 
     def read_convert_address(self):
-        self.session.send_data(chr(0xaa)*6, None, cmd=0x13)
+        if self.is645:
+            self.session.send_data(chr(0xaa)*6, None, cmd=0x13)
 
     def is645Taggle(self, is645):
         self.is645 = is645
