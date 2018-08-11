@@ -24,24 +24,32 @@ class SerialMedia(Media):
         return outputs
 
     def __init__(self):
-        options = list()
-        options.append(MediaOptions("port", self.find_possible_port(), u"端口号"))
-        options.append(MediaOptions("baudrate", serial.Serial.BAUDRATES, u"波特率"))
-        parity_show_option =  ['None', 'Even','Odd', 'Mark','Space']
-        parity_options = [serial.PARITY_NONE,serial.PARITY_EVEN,serial.PARITY_ODD,serial.PARITY_MARK,serial.PARITY_SPACE]
-        options.append(MediaOptions("parity", parity_options, u"校验位", parity_show_option))
+        super(SerialMedia, self).__init__(self.refresh_serial_options())
         self.serial = None
         self.read_timer = QTimer()
         self.read_timer.timeout.connect(self._receive)
         self.read_timer.start(10)
-        super(SerialMedia, self).__init__(options)
 
     def open(self):
-         if self.serial is None:
+        if self.serial is None:
             selected_options = self.get_selected_options()
             selected_options["timeout"] = 0
+        try:
             self.serial = serial.Serial(**selected_options)
-         return True
+        except serial.SerialException:
+            self.media_options = self.refresh_serial_options()
+            self.load_last_options()
+            return False
+        return True
+
+    def refresh_serial_options(self):
+        options = list()
+        options.append(MediaOptions("port", self.find_possible_port(), u"端口号"))
+        options.append(MediaOptions("baudrate", serial.Serial.BAUDRATES, u"波特率"))
+        parity_show_option = ['None', 'Even', 'Odd', 'Mark', 'Space']
+        parity_options = [serial.PARITY_NONE,serial.PARITY_EVEN,serial.PARITY_ODD,serial.PARITY_MARK,serial.PARITY_SPACE]
+        options.append(MediaOptions("parity", parity_options, u"校验位", parity_show_option))
+        return options
 
     def close(self):
         self.serial.close()
@@ -58,7 +66,8 @@ class SerialMedia(Media):
     def set_media_options(self, options):
         self.read_timer.stop()
         super(SerialMedia, self).set_media_options(options)
-        self.serial.close()
+        if self.serial is not None:
+            self.serial.close()
         self.serial = None
         self.open()
         self.read_timer.start(10)

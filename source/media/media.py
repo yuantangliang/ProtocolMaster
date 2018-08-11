@@ -2,6 +2,7 @@
 import os
 from PyQt4.QtCore import QObject
 import pickle
+from copy import deepcopy
 
 
 class MediaOptions(object):
@@ -25,9 +26,16 @@ class Media(QObject, object):
         super(Media, self).__init__()
         self.media_options = media_options
         self.pickle_file_name = ".config_" + self.__class__.__name__ + ".pkl"
+        self.load_last_options()
+
+    def load_last_options(self):
         if os.path.exists(self.pickle_file_name):
             with open(self.pickle_file_name, 'rb') as handle:
-                self.media_options = pickle.load(handle)
+                media_options = pickle.load(handle)
+            for current, last in zip(self.media_options, media_options):
+                if current.options == last.options:
+                    current.select_id = last.select_id
+        self.media_options
 
     def open(self):
         pass

@@ -11,9 +11,11 @@ from tools.converter import str2hexstr, hexstr2str
 from protocol.codec import BinaryDecoder,BinaryEncoder
 from ui.media_option_ui import get_user_options
 from config import ESConfig
+from serial import SerialException
 import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
+
 
 class EsMainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -33,6 +35,8 @@ class EsMainWindow(QMainWindow, Ui_MainWindow):
         self.session = SessionSuit.create_188_suit()
         self.session.data_ready.connect(self.protocol_handle)
 
+        self.show_media_config()
+
         action = QAction(u"通信参数", self)
         action.setShortcut("Ctrl+R")
         action.triggered.connect(self.show_media_config)
@@ -51,8 +55,8 @@ class EsMainWindow(QMainWindow, Ui_MainWindow):
         self.send_idx = 0
 
     def show_media_config(self):
-        def ok_button_press(options):
-            self.session.media.set_media_options(options)
+        def ok_button_press(select_options):
+            self.session.media.set_media_options(select_options)
         options = self.session.media.get_media_options()
         get_user_options(options, ok_button_press)
 

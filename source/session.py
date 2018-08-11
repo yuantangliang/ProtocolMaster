@@ -15,7 +15,6 @@ class SessionSuit(QObject):
     @staticmethod
     def create_188_suit():
         media = SerialMedia()
-        media.open()
         encoder = BinaryEncoder()
         decoder = BinaryDecoder()
         return SessionSuit(media, encoder, decoder, CJT188Protocol)
@@ -23,14 +22,12 @@ class SessionSuit(QObject):
     @staticmethod
     def create_645_suit():
         media = SerialMedia()
-        media.open()
         encoder = BinaryEncoder()
         decoder = BinaryDecoder()
         return SessionSuit(media, encoder, decoder, DL645Protocol)
 
     def __init__(self, media, encoder, decoder, protocol_cls):
         media.data_ready.connect(self.handle_receive_data)
-        media.open()
         self.media = media
         self.encoder = encoder
         self.decoder = decoder

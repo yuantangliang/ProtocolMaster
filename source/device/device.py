@@ -32,14 +32,13 @@ class Device(QObject):
         self.receive_count += 1
         self.update_rate(self.send_count)
         self.device_update.emit()
-        self.keep_send  = 0
-
+        self.keep_send = 0
 
     def update_rate(self, send_cnt):
         if 0 == send_cnt:
             self.rate = 1
         else:
-            self.rate  = float(self.receive_count)/send_cnt
+            self.rate = float(self.receive_count)/send_cnt
 
     def get_hex_string_address(self):
         return str2hexstr(self.address)
