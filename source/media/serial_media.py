@@ -19,12 +19,12 @@ class SerialMedia(Media):
             from serial.tools.list_ports_posix import comports
         else:
             raise ImportError("Sorry: no implementation for your platform ('{}') available".format(os.name))
-        ports  = comports(True)
+        ports = comports(True)
         outputs = [port.device for port in ports]
         return outputs
 
-    def __init__(self):
-        super(SerialMedia, self).__init__(self.refresh_serial_options())
+    def __init__(self, name):
+        super(SerialMedia, self).__init__(self.refresh_serial_options(), name)
         self.serial = None
         self.read_timer = QTimer()
         self.read_timer.timeout.connect(self._receive)
@@ -39,6 +39,7 @@ class SerialMedia(Media):
         except serial.SerialException:
             self.media_options = self.refresh_serial_options()
             self.load_last_options()
+            print "open serial error"
             return False
         return True
 
@@ -71,7 +72,6 @@ class SerialMedia(Media):
         self.serial = None
         self.open()
         self.read_timer.start(10)
-
 
 
 if __name__ == "__main__":

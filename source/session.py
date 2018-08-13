@@ -7,14 +7,22 @@ from protocol.fifo_buffer import FifoBuffer
 from tools.converter import hexstr2str, str2hexstr
 from PyQt4.QtCore import QObject, pyqtSignal
 from tools.converter import bytearray2str
+from protocol.ES7E_protocol import ES7EProtocol
 
 
 class SessionSuit(QObject):
     data_ready = pyqtSignal(Protocol)
 
     @staticmethod
+    def create_7E_suit():
+        media = SerialMedia("ES7E")
+        encoder = BinaryEncoder()
+        decoder = BinaryDecoder()
+        return SessionSuit(media, encoder, decoder, ES7EProtocol)
+
+    @staticmethod
     def create_188_suit():
-        media = SerialMedia()
+        media = SerialMedia("CJT188")
         encoder = BinaryEncoder()
         decoder = BinaryDecoder()
         return SessionSuit(media, encoder, decoder, CJT188Protocol)

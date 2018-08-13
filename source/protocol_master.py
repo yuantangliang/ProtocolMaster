@@ -7,11 +7,13 @@ from device.device import get_all_device, find_device_by_address
 from session import SessionSuit
 from protocol.CJT188_protocol import DIDReadMeter,CJT188Protocol
 from protocol.DL645_protocol import DIDReadAddress,DIDRealTimeMeterData, DL645Protocol
+from protocol.ES7E_protocol import DIDSwitchReverse
 from tools.converter import str2hexstr, hexstr2str
 from protocol.codec import BinaryDecoder,BinaryEncoder
 from ui.media_option_ui import get_user_options
 from config import ESConfig
 from serial import SerialException
+import random
 import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
@@ -31,15 +33,27 @@ class EsMainWindow(QMainWindow, Ui_MainWindow):
         self.tableWidget.setEditTriggers(self.tableWidget.NoEditTriggers)
         self.timer = QTimer()
         self.timer.timeout.connect(self.read_next_device)
+
         self.is645 = False
         self.session = SessionSuit.create_188_suit()
         self.session.data_ready.connect(self.protocol_handle)
+        self.show_media_config(self.session.media)
 
-        self.show_media_config()
+        self.switch_session = SessionSuit.create_7E_suit()
+        self.switch_timer = QTimer()
+        self.switch_timer.setSingleShot(True)
+        self.switch_timer.timeout.connect(self.switch_reverse)
+        self.switch_session.media.open()
 
         action = QAction(u"通信参数", self)
         action.setShortcut("Ctrl+R")
-        action.triggered.connect(self.show_media_config)
+        action.triggered.connect(self.show_communication_media)
+        self.menuSet.addAction(action)
+        self.toolbar.addAction(action)
+
+        action = QAction(u"通断串口参数", self)
+        action.setShortcut("Ctrl+R")
+        action.triggered.connect(self.show_switch_media)
         self.menuSet.addAction(action)
         self.toolbar.addAction(action)
 
@@ -51,13 +65,22 @@ class EsMainWindow(QMainWindow, Ui_MainWindow):
         devices = get_all_device(ESConfig.get_instance().get_device_file())
         self.devices = devices
         self.sync_device_to_ui()
-
         self.send_idx = 0
 
-    def show_media_config(self):
+    def switch_reverse(self):
+        self.switch_session.send_data("789841", DIDSwitchReverse(0x08))
+
+    def show_switch_media(self):
+        self.show_media_config(self.switch_session.media)
+
+    def show_communication_media(self):
+        self.show_media_config(self.session.media)
+
+    @staticmethod
+    def show_media_config(media):
         def ok_button_press(select_options):
-            self.session.media.set_media_options(select_options)
-        options = self.session.media.get_media_options()
+            media.set_media_options(select_options)
+        options = media.get_media_options()
         get_user_options(options, ok_button_press)
 
     def import_device_list(self):
@@ -91,6 +114,8 @@ class EsMainWindow(QMainWindow, Ui_MainWindow):
             self.session.send_data(hexstr2str(str(self.convertAddressLineEdit.text())), DIDRealTimeMeterData(device.address))
         else:
             self.session.send_data(device.address, DIDReadMeter())
+        value = random.randrange(0, 1000)
+        self.switch_timer.start(1200+value)
 
     def eventFilter(self, source, event):
         if source == self.video_label and event.type() == QEvent.MouseButtonPress:
@@ -103,7 +128,7 @@ class EsMainWindow(QMainWindow, Ui_MainWindow):
             QMessageBox.information(self, u"导入设备", u"轮抄需要首先导入设备列表")
             return
         self.read_next_device()
-        self.timer.start(int(str(self.readMeterSpanLineEdit.text()))*1000)
+        self.timer.start(int(float(str(self.readMeterSpanLineEdit.text()))*1000))
 
     def stop(self):
         self.timer.stop()
@@ -144,6 +169,8 @@ def protocol_master_run():
     ex.move((QApplication.desktop().width() - ex.width()) / 2, (QApplication.desktop().height() - ex.height()) / 2);
     ex.show()
     sys.exit(app.exec_())
+
+
 
 if __name__ == '__main__':
     protocol_master_run()

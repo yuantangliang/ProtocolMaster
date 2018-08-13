@@ -22,10 +22,13 @@ class MediaOptions(object):
 
 
 class Media(QObject, object):
-    def __init__(self, media_options):
+    def __init__(self, media_options, name=None):
         super(Media, self).__init__()
         self.media_options = media_options
-        self.pickle_file_name = ".config_" + self.__class__.__name__ + ".pkl"
+        if name is None:
+            self.pickle_file_name = ".config_" + self.__class__.__name__ + ".pkl"
+        else:
+            self.pickle_file_name = ".config_" + name + self.__class__.__name__ + ".pkl"
         self.load_last_options()
 
     def load_last_options(self):
