@@ -34,7 +34,7 @@ class EsMainWindow(QMainWindow, Ui_MainWindow):
         self.is645 = False
         self.session = SessionSuit.create_188_suit()
         self.session.data_ready.connect(self.protocol_handle)
-
+        self.session.media.error.connect(self.show_media_error)
         self.show_media_config()
 
         action = QAction(u"通信参数", self)
@@ -54,11 +54,11 @@ class EsMainWindow(QMainWindow, Ui_MainWindow):
 
         self.send_idx = 0
 
+    def show_media_error(self, msg):
+        QMessageBox.information(self, u"串口错误", msg)
+
     def show_media_config(self):
-        def ok_button_press(select_options):
-            self.session.media.set_media_options(select_options)
-        options = self.session.media.get_media_options()
-        get_user_options(options, ok_button_press)
+        get_user_options(self.session.media)
 
     def import_device_list(self):
         file_name = QFileDialog.getOpenFileName(directory=ESConfig.get_instance().get_device_file())

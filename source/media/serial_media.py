@@ -5,11 +5,11 @@ from collections import OrderedDict
 import serial
 from PyQt4.QtCore import QTimer, pyqtSignal
 from tools.converter import str2bytearray
+from serial import SerialException
 
 
 @media_register
 class SerialMedia(Media):
-    data_ready = pyqtSignal(bytearray)
 
     @staticmethod
     def find_possible_port():
@@ -24,7 +24,7 @@ class SerialMedia(Media):
         return outputs
 
     def __init__(self):
-        super(SerialMedia, self).__init__(self.refresh_serial_options())
+        super(SerialMedia, self).__init__(self._get_all_options())
         self.serial = None
         self.read_timer = QTimer()
         self.read_timer.timeout.connect(self._receive)
@@ -37,12 +37,11 @@ class SerialMedia(Media):
         try:
             self.serial = serial.Serial(**selected_options)
         except serial.SerialException:
-            self.media_options = self.refresh_serial_options()
-            self.load_last_options()
+            self.refresh_media_options()
             return False
-        return True
+        return self.serial.is_open
 
-    def refresh_serial_options(self):
+    def _get_all_options(self):
         options = list()
         options.append(MediaOptions("port", self.find_possible_port(), u"端口号"))
         options.append(MediaOptions("baudrate", serial.Serial.BAUDRATES, u"波特率"))
@@ -51,17 +50,26 @@ class SerialMedia(Media):
         options.append(MediaOptions("parity", parity_options, u"校验位", parity_show_option))
         return options
 
+    def refresh_media_options(self):
+        self.media_options = self._get_all_options()
+        self.load_saved_options()
+
     def close(self):
-        self.serial.close()
+        if self.serial is not None:
+            self.serial.close()
 
     def send(self, data):
         self.serial.write(data)
 
     def _receive(self):
         if self.serial is not None and self.serial.is_open:
-            data = self.serial.read(100)
-            if len(data) > 0:
-                self.data_ready.emit(str2bytearray(data))
+            try:
+                data = self.serial.read(100)
+                if len(data) > 0:
+                    self.data_ready.emit(str2bytearray(data))
+            except SerialException, e:
+                self.error.emit(u"串口发生错误")
+                self.close()
 
     def set_media_options(self, options):
         self.read_timer.stop()
@@ -69,9 +77,9 @@ class SerialMedia(Media):
         if self.serial is not None:
             self.serial.close()
         self.serial = None
-        self.open()
+        is_open = self.open()
         self.read_timer.start(10)
-
+        return is_open
 
 
 if __name__ == "__main__":

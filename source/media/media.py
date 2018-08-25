@@ -1,6 +1,6 @@
 # encoding:utf-8
 import os
-from PyQt4.QtCore import QObject
+from PyQt4.QtCore import QObject, pyqtSignal
 import pickle
 from copy import deepcopy
 
@@ -22,13 +22,16 @@ class MediaOptions(object):
 
 
 class Media(QObject, object):
+    data_ready = pyqtSignal(bytearray)
+    error = pyqtSignal(str)
+
     def __init__(self, media_options):
         super(Media, self).__init__()
         self.media_options = media_options
         self.pickle_file_name = ".config_" + self.__class__.__name__ + ".pkl"
-        self.load_last_options()
+        self.load_saved_options()
 
-    def load_last_options(self):
+    def load_saved_options(self):
         if os.path.exists(self.pickle_file_name):
             with open(self.pickle_file_name, 'rb') as handle:
                 media_options = pickle.load(handle)
@@ -49,18 +52,23 @@ class Media(QObject, object):
     def _receive(self):
         pass
 
+    def refresh_media_options(self):
+        pass
+
     def set_media_options(self, options):
         self.media_options = options
         with open(self.pickle_file_name, 'wb') as handle:
             pickle.dump(options, handle)
 
     def get_media_options(self):
+        self.refresh_media_options()
         return self.media_options
 
     def get_selected_options(self):
         selected_options = {}
         for option in self.media_options:
-            selected_options[option.key] = option.options[option.select_id]
+            if option.select_id >=0 and option.select_id < len(option.options):
+                selected_options[option.key] = option.options[option.select_id]
         return selected_options
 
 

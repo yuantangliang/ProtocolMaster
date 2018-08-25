@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from media_option_example import Ui_ChannelDialog
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4 import QtCore, QtGui
@@ -12,6 +11,7 @@ class EsUserOptionsDialog(QDialog):
         self.options = []
         self.setModal(True)
         self.ok_func = None
+        self.close_func = None
         self.vlayout = None
         self.group_widget =None
         self.widget_list =[]
@@ -43,7 +43,7 @@ class EsUserOptionsDialog(QDialog):
 
         self.buttonBox = QtGui.QDialogButtonBox(self)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
+        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Open|QtGui.QDialogButtonBox.Close)
         self.vlayout.addWidget(self.buttonBox)
         self.setLayout(self.vlayout)
 
@@ -52,9 +52,13 @@ class EsUserOptionsDialog(QDialog):
         self.setup_ui()
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
+        self.buttonBox.clicked.connect(self.close)
 
     def set_ok_function(self, func):
         self.ok_func = func
+
+    def set_close_function(self,func):
+        self.close_func = func
 
     def accept(self):
         if self.ok_func is not None:
@@ -62,6 +66,11 @@ class EsUserOptionsDialog(QDialog):
         self.hide()
 
     def reject(self):
+        self.hide()
+
+    def close(self):
+        if self.close_func is not None:
+            self.close_func()
         self.hide()
 
     def get_user_options(self):
@@ -72,11 +81,22 @@ class EsUserOptionsDialog(QDialog):
 dialog = None
 
 
-def get_user_options(options, ok_select):
+def get_user_options(media):
     global dialog
+
+    def ok_button_press(options):
+        if media.set_media_options(options):
+            dialog.hide()
+        else:
+            QMessageBox.information(dialog, u"错误", u"打开错误，请检查资源是否被占用")
+
+    def close_button_press():
+        media.close()
+
     dialog = EsUserOptionsDialog()
-    dialog.set_options(options)
-    dialog.set_ok_function(ok_select)
+    dialog.set_options(media.get_media_options())
+    dialog.set_ok_function(ok_button_press)
+    dialog.set_close_function(close_button_press())
     dialog.show()
 
 
