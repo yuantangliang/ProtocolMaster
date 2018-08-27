@@ -15,9 +15,12 @@ from serial import SerialException
 import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
-
+from media.serial_media import SerialMedia
+from media.tcp_media import TCPMedia
 
 class EsMainWindow(QMainWindow, Ui_MainWindow):
+    TCP  = 0
+    UART = 1
     def __init__(self):
         super(EsMainWindow, self).__init__()
         self.setupUi(self)
@@ -32,7 +35,11 @@ class EsMainWindow(QMainWindow, Ui_MainWindow):
         self.timer = QTimer()
         self.timer.timeout.connect(self.read_next_device)
         self.is645 = False
-        self.session = SessionSuit.create_188_suit()
+        if self.TCP == self.get_select_media():
+            self.session = SessionSuit.create_188_suit(TCPMedia())
+        else:
+            self.session = SessionSuit.create_188_suit(SerialMedia())
+
         self.session.data_ready.connect(self.protocol_handle)
         self.session.media.error.connect(self.show_media_error)
         self.show_media_config()
@@ -53,6 +60,10 @@ class EsMainWindow(QMainWindow, Ui_MainWindow):
         self.sync_device_to_ui()
 
         self.send_idx = 0
+
+    def get_select_media(self):
+        reply = QMessageBox.information(self, u"通信方式", u"请选择通信方式", "TCP","UART")
+        return reply
 
     def show_media_error(self, msg):
         QMessageBox.information(self, u"串口错误", msg)

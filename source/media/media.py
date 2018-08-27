@@ -20,6 +20,33 @@ class MediaOptions(object):
     def get_options(self):
         return [str(i) for i in self.show_options]
 
+    def get_selected_key_value(self):
+        if 0 <= self.select_id < len(self.options):
+            return self.key, self.options[self.select_id]
+
+    def load_save_value(self, saved):
+        if self.options == saved.options:
+            self.select_id = saved.select_id
+
+
+class MediaText(object):
+    def __init__(self, key, value, label_text=None, func=None):
+        self.key = key
+        self.value = value
+        if label_text is None:
+            label_text = key
+        self.label_text = label_text
+        self.func = func
+
+    def get_options(self):
+        return str(self.value)
+
+    def get_selected_key_value(self):
+        return self.key, self.value
+
+    def load_save_value(self, saved):
+        self.value = saved.value
+
 
 class Media(QObject, object):
     data_ready = pyqtSignal(bytearray)
@@ -36,9 +63,7 @@ class Media(QObject, object):
             with open(self.pickle_file_name, 'rb') as handle:
                 media_options = pickle.load(handle)
             for current, last in zip(self.media_options, media_options):
-                if current.options == last.options:
-                    current.select_id = last.select_id
-        self.media_options
+                current.load_save_value(last)
 
     def open(self):
         pass
@@ -67,8 +92,8 @@ class Media(QObject, object):
     def get_selected_options(self):
         selected_options = {}
         for option in self.media_options:
-            if option.select_id >=0 and option.select_id < len(option.options):
-                selected_options[option.key] = option.options[option.select_id]
+           key,value = option.get_selected_key_value()
+           selected_options[key] = value
         return selected_options
 
 

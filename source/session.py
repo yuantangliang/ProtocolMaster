@@ -13,8 +13,7 @@ class SessionSuit(QObject):
     data_ready = pyqtSignal(Protocol)
 
     @staticmethod
-    def create_188_suit():
-        media = SerialMedia()
+    def create_188_suit(media):
         encoder = BinaryEncoder()
         decoder = BinaryDecoder()
         return SessionSuit(media, encoder, decoder, CJT188Protocol)
