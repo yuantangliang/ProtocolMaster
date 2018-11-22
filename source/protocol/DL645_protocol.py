@@ -3,6 +3,7 @@ from protocol import Protocol, protocol_register
 from protocol import checksum, find_head
 from codec import BinaryEncoder, BinaryDecoder
 from tools.converter import hexstr2str, str2hexstr
+from CJT188_protocol import  CJT188Protocol
 
 DL645_HEAD = chr(0x68)
 DL645_TAIL = chr(0x16)
@@ -28,15 +29,16 @@ class DIDRealTimeMeterData(object):
         self.current_meter_used = 0
 
     def encode(self, encoder):
-        encoder.encode_byte(00)
-        encoder.encode_byte(0xff)
-        encoder.encode_byte(0x01)
+        protocol =   CJT188Protocol(self.address)
+        #encoder.encode_byte(00)
         encoder.encode_byte(0x00)
-        encoder.encode_byte(0x00)
-        encoder.encode_str(self.address[::-1])
+        encoder.encode_byte(0x06)
+        encoder.encode_byte(0xa0)
+        encoder.encode_byte(0x04)
+        encoder.encode_object(protocol)
 
     def decode(self, decoder):
-        decoder.decode_str(54) # did
+        decoder.decode_str(6) # did
         self.address = decoder.decode_str(7)[::-1]
 
 

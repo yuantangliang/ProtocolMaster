@@ -46,7 +46,7 @@ class CJT188Protocol(Protocol):
         self.cmd = 0x01
         self.length = 0x04
         self.did_unit = DIDReadMeter()
-        self.serial = 0x90
+        self.serial = 0x00
 
     def padding_address(self):
         if len(self.address) != 7:
@@ -55,16 +55,24 @@ class CJT188Protocol(Protocol):
 
     def encode(self, encoder):
         self.padding_address()
-        encoder.encode_str(CJT188_HEAD)
-        encoder.encode_byte(self.meter_type)
-        encoder.encode_str(self.address[::-1])
-        encoder.encode_byte(self.cmd)
-        length = len(encoder.object2data(self.did_unit))
-        encoder.encode_byte(length)
+        # encoder.encode_byte(0xfe)
+        # encoder.encode_byte(0xfe)
+        # encoder.encode_byte(0xfe)
+        # encoder.encode_byte(0xfe)
+        a_encoder = BinaryEncoder()
+        a_encoder.encode_str(CJT188_HEAD)
+        a_encoder.encode_byte(self.meter_type)
+        a_encoder.encode_str(self.address[::-1])
+        a_encoder.encode_byte(self.cmd)
+        length = len(a_encoder.object2data(self.did_unit))
+        a_encoder.encode_byte(length)
         self.did_unit.serial = self.serial
-        encoder.encode_object(self.did_unit)
-        encoder.encode_byte(checksum(encoder.get_data()))
-        encoder.encode_str(CJT188_TAIL)
+        a_encoder.encode_object(self.did_unit)
+        a_encoder.encode_byte(checksum(a_encoder.get_data()))
+        a_encoder.encode_str(CJT188_TAIL)
+        encoder.encode_str(a_encoder.get_data())
+        # print str2hexstr(a_encoder.get_data())
+        # print str2hexstr(encoder.get_data())
 
     def decode(self, decoder):
         decoder.decode_str(2)

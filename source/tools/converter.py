@@ -10,6 +10,7 @@ def hexstr2str(string):
     """
     string = string.strip()
     hex_data = ""
+    print string
     for byte in string.split(" "):
         if byte is '':
             continue
